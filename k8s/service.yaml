@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mlops-fastapi
+spec:
+  selector:
+    app: mlops-fastapi
+  ports:
+    - port: 8000
+      targetPort: 8000
