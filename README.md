@@ -105,6 +105,18 @@ uvicorn app.main:app --reload
 
 ---
 
+## Docker
+
+The project can be also run in Docker
+
+1. Build the image 
+docker build -t property-scoring-api .
+
+2. Run the container 
+docker run -p 8000:8000 property-scoring-api
+
+---
+
 ## Usage
 
 Open:
