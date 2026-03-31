@@ -157,10 +157,18 @@ uvicorn app.main:app --reload
 ```
 Verify with: `curl "http://127.0.0.1:8000/score?price=300000&surface=60&rooms=3&latitude=48.71&longitude=2.16"`
 
+**Running tests:**
+```
+pip install pytest httpx
+pytest tests/ -v
+```
+
 ---
 
 ## Authors
 
 Charles de Cossé Brissac
+
 Baptiste Noel
+
 Valentin Levy
