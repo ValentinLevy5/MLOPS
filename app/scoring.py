@@ -1,21 +1,34 @@
 import json
+import logging
 import math
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 CAMPUS_LAT = 48.709681000891
 CAMPUS_LON = 2.163486975321
 
 MODEL_PATH = Path("artifacts/model.json")
 
+_REQUIRED_KEYS = {"intercept", "coef_log_surface", "coef_rooms", "sigma", "n_train"}
+
 
 def load_model() -> dict:
     if not MODEL_PATH.exists():
+        logger.error("Model file not found: %s", MODEL_PATH)
         raise FileNotFoundError(
             "Model file not found. Please run train_model.py first."
         )
 
     with open(MODEL_PATH, "r", encoding="utf-8") as f:
-        return json.load(f)
+        model = json.load(f)
+
+    missing = _REQUIRED_KEYS - model.keys()
+    if missing:
+        raise ValueError(f"Model file is missing keys: {missing}")
+
+    logger.info("Loaded model from %s (n_train=%d)", MODEL_PATH, model["n_train"])
+    return model
 
 
 def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -46,6 +59,9 @@ def compute_expected_price(surface: float, rooms: int, model: dict) -> float:
 def compute_market_score(price: float, expected_price: float, sigma: float) -> tuple[float, str, float]:
     ratio = price / expected_price
 
+    if sigma <= 0:
+        logger.warning("sigma is zero or negative; clamping denominator to 1.0")
+
     # score in [0,1], best when ratio close to 1
     score = max(0.0, 1.0 - abs(math.log(ratio)) / (2 * sigma if sigma > 0 else 1.0))
     score = min(1.0, score)
@@ -61,8 +77,7 @@ def compute_market_score(price: float, expected_price: float, sigma: float) -> t
 
 
 def compute_distance_score(distance_km: float) -> float:
-    # simple business rule:
-    # 1.0 if very close, then decreases linearly, reaches 0 at 10 km
+    # 1.0 at 0 km, linear decay to 0 at 10 km
     score = max(0.0, 1.0 - distance_km / 10.0)
     return min(1.0, score)
 
