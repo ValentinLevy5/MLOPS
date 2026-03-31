@@ -1,8 +1,11 @@
 import json
+import logging
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 
 CSV_PATH = "data/dvf.csv"
@@ -73,6 +76,7 @@ def train_model(csv_path: str = CSV_PATH, out_path: str = OUT_PATH) -> dict:
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     model = train_model()
-    print("Model saved to artifacts/model.json")
-    print(model)
+    logger.info("Model saved to artifacts/model.json")
+    logger.info("Model parameters: %s", model)

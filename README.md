@@ -33,11 +33,9 @@ Variables used:
 
 ## Method
 
-The model follows a simple and interpretable approach.
-
 ### Training (offline)
 
-A regression model is trained on DVF data:
+A log-linear regression model is trained on DVF data:
 
 log(price) = b0 + b1 * log(surface) + b2 * rooms
 
@@ -107,12 +105,12 @@ uvicorn app.main:app --reload
 
 ## Docker
 
-The project can be also run in Docker
+The project can also be run with Docker
 
-1. Build the image 
+1. Build the image
 docker build -t property-scoring-api .
 
-2. Run the container 
+2. Run the container
 docker run -p 8000:8000 property-scoring-api
 
 ---
@@ -137,11 +135,32 @@ Test /score with:
 
 - No database is used (stateless API)
 - The dataset is not included in the repository
-- The model is stored as a lightweight artifact (model.json)
+- The model is stored as a JSON file (artifacts/model.json)
 - Coordinates are used instead of addresses for simplicity
 
 ---
 
-## Author
+## For maintainers
 
-Project developed as a practical MLOps exercise focused on building a simple and interpretable real estate scoring API.
+**Updating the model:**
+1. Place a fresh `dvf.csv` in `data/`
+2. Run `python train_model.py` — this overwrites `artifacts/model.json`
+3. Before deploying, spot-check a few known properties: compare `expected_price` with the previous model version to catch regressions
+4. Commit `artifacts/model.json` with a note on the training date and data range
+
+**Running locally:**
+```
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+python train_model.py          # requires data/dvf.csv
+uvicorn app.main:app --reload
+```
+Verify with: `curl "http://127.0.0.1:8000/score?price=300000&surface=60&rooms=3&latitude=48.71&longitude=2.16"`
+
+---
+
+## Authors
+
+Charles de Cossé Brissac
+Baptiste Noel
+Valentin Levy
